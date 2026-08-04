@@ -23,6 +23,12 @@ jobs:
       - name: Show Xcode version
         run: xcodebuild -version
       
+      - name: Install xcodegen
+        run: brew install xcodegen
+      
+      - name: Generate Xcode project
+        run: xcodegen generate
+      
       - name: Build iOS App
         run: |
           set -x
@@ -37,64 +43,32 @@ jobs:
             PROVISIONING_PROFILE_SPECIFIER="" \
             | tee build.log
           echo "=== Build completed ==="
-          echo "Contents of build directory:"
-          ls -la build/ || echo "build/ not found"
-          echo "=== Searching for .app ==="
+          echo "Searching for .app..."
           find build -name "*.app" -type d 2>/dev/null || echo "No .app in build/"
-          echo "=== Searching entire workspace ==="
-          find . -path "*/Build/Products/*" -name "*.app" -type d 2>/dev/null || echo "No .app in Products"
           find . -name "*.app" -type d 2>/dev/null | head -10 || echo "No .app anywhere"
       
       - name: Package .app
         if: success()
         run: |
           set -x
-          echo "Searching for BudsControl.app..."
-          APP_PATH=""
-          
-          # Try multiple search strategies
-          for path in $(find build -name "BudsControl.app" -type d 2>/dev/null); do
-            APP_PATH="$path"
-            break
-          done
-          
+          APP_PATH=$(find build -name "BudsControl.app" -type d 2>/dev/null | head -n 1)
           if [ -z "$APP_PATH" ]; then
-            for path in $(find . -path "*/Build/Products/*" -name "BudsControl.app" -type d 2>/dev/null); do
-              APP_PATH="$path"
-              break
-            done
+            APP_PATH=$(find . -name "BudsControl.app" -type d 2>/dev/null | head -n 1)
           fi
-          
           if [ -z "$APP_PATH" ]; then
-            for path in $(find . -name "BudsControl.app" -type d 2>/dev/null); do
-              APP_PATH="$path"
-              break
-            done
-          fi
-          
-          if [ -z "$APP_PATH" ]; then
-            echo "❌ BudsControl.app not found anywhere"
-            echo "Current directory:"
-            pwd
-            echo "All directories in build:"
-            find build -type d 2>/dev/null | head -50
+            echo "❌ BudsControl.app not found"
             exit 1
           fi
-          
           echo "✅ Found app at: $APP_PATH"
           mkdir -p artifacts
-          
-          # Create proper IPA structure
           mkdir -p Payload
           cp -R "$APP_PATH" Payload/
           cd Payload
           ls -la
           cd ..
-          
           zip -r artifacts/BudsControl-unsigned.ipa Payload
           rm -rf Payload
-          
-          echo "✅ IPA created successfully!"
+          echo "✅ IPA created!"
           ls -lh artifacts/
       
       - name: Upload artifact
