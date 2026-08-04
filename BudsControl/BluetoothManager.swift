@@ -427,7 +427,7 @@ enum EQPreset: String, CaseIterable {
     }
 }
 
-enum NoiseControlMode: String {
+enum NoiseControlMode: String, CaseIterable {
     case off = "Off"
     case ambient = "Ambient"
     case anc = "ANC"

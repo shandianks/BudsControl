@@ -37,6 +37,7 @@ struct ExtendedStatusUpdate {
     let deviceColor: Int
     let sideToneEnable: Bool
     let extraHighAmbientEnable: Bool
+    let ambientVolume: Int
 }
 
 // MARK: - Message Decoder
@@ -122,6 +123,7 @@ struct MessageDecoder {
         let deviceColor = Int(message.payload[14])
         let sideToneEnable = message.payload[15] != 0
         let extraHighAmbientEnable = message.payload[16] != 0
+        let ambientVolume = message.payload.count >= 18 ? Int(message.payload[17]) : 0
         
         return ExtendedStatusUpdate(
             revision: revision,
@@ -143,7 +145,8 @@ struct MessageDecoder {
             touchOptions: touchOptions,
             deviceColor: deviceColor,
             sideToneEnable: sideToneEnable,
-            extraHighAmbientEnable: extraHighAmbientEnable
+            extraHighAmbientEnable: extraHighAmbientEnable,
+            ambientVolume: ambientVolume
         )
     }
     

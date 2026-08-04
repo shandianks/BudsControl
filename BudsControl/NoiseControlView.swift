@@ -110,8 +110,6 @@ struct NoiseControlView: View {
     }
 }
 
-extension NoiseControlMode: CaseIterable {}
-
 struct NoiseControlView_Previews: PreviewProvider {
     static var previews: some View {
         NoiseControlView()
