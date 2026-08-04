@@ -25,6 +25,7 @@ jobs:
       
       - name: Build iOS App
         run: |
+          set -x
           xcodebuild -project BudsControl.xcodeproj \
             -scheme BudsControl \
             -sdk iphoneos \
@@ -35,36 +36,66 @@ jobs:
             CODE_SIGN_IDENTITY="" \
             PROVISIONING_PROFILE_SPECIFIER="" \
             | tee build.log
-          echo "---"
-          echo "Build output structure:"
-          find build -name "*.app" -type d 2>/dev/null || echo "No .app found in build/"
-          find build -type d -name "Build" 2>/dev/null | head -5
+          echo "=== Build completed ==="
+          echo "Contents of build directory:"
+          ls -la build/ || echo "build/ not found"
+          echo "=== Searching for .app ==="
+          find build -name "*.app" -type d 2>/dev/null || echo "No .app in build/"
+          echo "=== Searching entire workspace ==="
+          find . -path "*/Build/Products/*" -name "*.app" -type d 2>/dev/null || echo "No .app in Products"
+          find . -name "*.app" -type d 2>/dev/null | head -10 || echo "No .app anywhere"
       
       - name: Package .app
         if: success()
         run: |
+          set -x
           echo "Searching for BudsControl.app..."
-          APP_PATH=$(find build -name "BudsControl.app" -type d 2>/dev/null | head -n 1)
+          APP_PATH=""
+          
+          # Try multiple search strategies
+          for path in $(find build -name "BudsControl.app" -type d 2>/dev/null); do
+            APP_PATH="$path"
+            break
+          done
+          
           if [ -z "$APP_PATH" ]; then
-            echo "Trying alternative paths..."
-            APP_PATH=$(find . -path "*/Build/Products/*" -name "BudsControl.app" -type d 2>/dev/null | head -n 1)
+            for path in $(find . -path "*/Build/Products/*" -name "BudsControl.app" -type d 2>/dev/null); do
+              APP_PATH="$path"
+              break
+            done
           fi
+          
           if [ -z "$APP_PATH" ]; then
-            echo "Listing build directory:"
-            ls -la build/ 2>/dev/null || echo "build/ not found"
-            find build -type d -maxdepth 4 2>/dev/null | head -30
-            echo "❌ .app not found"
+            for path in $(find . -name "BudsControl.app" -type d 2>/dev/null); do
+              APP_PATH="$path"
+              break
+            done
+          fi
+          
+          if [ -z "$APP_PATH" ]; then
+            echo "❌ BudsControl.app not found anywhere"
+            echo "Current directory:"
+            pwd
+            echo "All directories in build:"
+            find build -type d 2>/dev/null | head -50
             exit 1
           fi
-          echo "Found app at: $APP_PATH"
+          
+          echo "✅ Found app at: $APP_PATH"
           mkdir -p artifacts
-          cp -R "$APP_PATH" artifacts/
-          cd artifacts
+          
+          # Create proper IPA structure
           mkdir -p Payload
-          cp -R BudsControl.app Payload/
-          zip -r BudsControl-unsigned.ipa Payload
+          cp -R "$APP_PATH" Payload/
+          cd Payload
+          ls -la
+          cd ..
+          
+          zip -r artifacts/BudsControl-unsigned.ipa Payload
           rm -rf Payload
-          echo "✅ Build successful!"
+          
+          echo "✅ IPA created successfully!"
+          ls -lh artifacts/
       
       - name: Upload artifact
         if: success()
