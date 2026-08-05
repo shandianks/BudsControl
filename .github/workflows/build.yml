@@ -31,7 +31,6 @@ jobs:
       
       - name: Build iOS App
         run: |
-          set -euo pipefail
           xcodebuild -project BudsControl.xcodeproj \
             -scheme BudsControl \
             -sdk iphoneos \
@@ -40,14 +39,8 @@ jobs:
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGN_IDENTITY="" \
-            PROVISIONING_PROFILE_SPECIFIER="" 2>&1 | tee build.log || {
-              echo "=== BUILD FAILED ==="
-              echo "=== ERROR SUMMARY ==="
-              grep -E "error:|warning:|fatal:|Build FAILED|FAILED" build.log | tail -20 || true
-              echo "=== FULL LOG (last 50 lines) ==="
-              tail -n 50 build.log
-              exit 1
-            }
+            PROVISIONING_PROFILE_SPECIFIER=""
+          echo "=== Build exit code: $? ==="
           echo "=== Build succeeded ==="
           find build -name "*.app" -type d 2>/dev/null || echo "No .app in build/"
       
