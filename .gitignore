@@ -1,12 +1,10 @@
-.DS_Store
-build/
-DerivedData/
+# Git ignore patterns
 *.ipa
 *.zip
+Payload/
+*.app
+build/
+DerivedData/
 logs/
-logs.zip
-ipa_check/
-ipa_check.zip
-run*_logs/
-run*_logs.zip
 *.log
+.DS_Store

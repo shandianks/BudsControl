@@ -2,20 +2,251 @@ import Foundation
 import CoreBluetooth
 import Combine
 
+// MARK: - SPP Message Structure
+struct SPPMessage {
+    var id: UInt8
+    var payload: Data
+    var isResponse: Bool = false
+    var isFragment: Bool = false
+    
+    static let som: UInt8 = 0xFD
+    static let eom: UInt8 = 0xDD
+    static let smepSom: UInt8 = 0xFE
+    static let smepEom: UInt8 = 0xEE
+    
+    func encode() -> Data {
+        var data = Data()
+        data.append(SPPMessage.som)
+        
+        let payloadSize = UInt16(1 + payload.count + 2) // msgId + payload + crc
+        var header = payloadSize
+        if isFragment { header |= 0x2000 }
+        if isResponse { header |= 0x1000 }
+        
+        data.append(UInt8((header >> 8) & 0xFF))
+        data.append(UInt8(header & 0xFF))
+        data.append(id)
+        data.append(contentsOf: payload)
+        
+        let crcData = Data([id]) + payload
+        let crc = CRC16.ccitt(crcData)
+        data.append(UInt8(crc & 0xFF))
+        data.append(UInt8((crc >> 8) & 0xFF))
+        data.append(SPPMessage.eom)
+        
+        return data
+    }
+}
+
+// MARK: - CRC16-CCITT
+enum CRC16 {
+    private static let table: [UInt16] = {
+        var table = [UInt16](repeating: 0, count: 256)
+        for i in 0..<256 {
+            var crc = UInt16(i) << 8
+            for _ in 0..<8 {
+                if crc & 0x8000 != 0 {
+                    crc = (crc << 1) ^ 0x1021
+                } else {
+                    crc = crc << 1
+                }
+            }
+            table[i] = crc
+        }
+        return table
+    }()
+    
+    static func ccitt(_ data: Data) -> UInt16 {
+        var crc: UInt16 = 0x0000
+        for byte in data {
+            let idx = Int((crc >> 8) ^ UInt16(byte)) & 0xFF
+            crc = (crc << 8) ^ table[idx]
+        }
+        return crc
+    }
+}
+
+// MARK: - Message IDs
+enum MsgId: UInt8 {
+    case statusUpdated = 0x60
+    case extendedStatusUpdated = 0x61
+    case updateTime = 0x64
+    case managerInfo = 0x65
+    case equalizer = 0x66
+    case lockTouchpad = 0x67
+    case setAmbientMode = 0x68
+    case ambientVolume = 0x69
+    case gameMode = 0x6F
+    case findMyEarbudsStart = 0x70
+    case findMyEarbudsStop = 0x71
+    case serialNumber = 0x72
+    case debugGetAllData = 0x74
+    case debugBuildInfo = 0x75
+    case acknowledgement = 0x7C
+    case versionInfo = 0x7D
+    case ambientModeUpdate = 0x7E
+    case ambientVoiceFocus = 0x7F
+    case ambientWearingUpdate = 0x80
+    case noiseReduction = 0x81
+    case anc = 0x86
+    case ancLevel = 0x87
+    case noiseControl = 0x93
+    case noiseControlDual = 0x94
+    case chargingState = 0x95
+    case smartThingsFind = 0x97
+}
+
+// MARK: - Device Models
+enum DeviceModel: String, CaseIterable {
+    case buds2 = "Buds2"
+    case buds2Pro = "Buds2 Pro"
+    case budsPro = "Buds Pro"
+    case budsLive = "Buds Live"
+    case budsPlus = "Buds+"
+    case buds3 = "Buds3"
+    case buds3Pro = "Buds3 Pro"
+    case budsFE = "Buds FE"
+    
+    var supportsNoiseControl: Bool {
+        switch self {
+        case .buds2, .buds2Pro, .budsPro, .buds3, .buds3Pro:
+            return true
+        default:
+            return false
+        }
+    }
+    
+    var supportsANC: Bool {
+        switch self {
+        case .buds2Pro, .budsPro, .buds3Pro:
+            return true
+        default:
+            return false
+        }
+    }
+    
+    var supportsAmbientSound: Bool {
+        switch self {
+        case .buds2, .buds2Pro, .budsPro, .budsLive, .buds3, .buds3Pro, .budsFE:
+            return true
+        default:
+            return false
+        }
+    }
+    
+    var supportsCaseBattery: Bool {
+        switch self {
+        case .budsPlus, .buds2, .buds2Pro, .budsPro, .buds3, .buds3Pro, .budsFE:
+            return true
+        default:
+            return false
+        }
+    }
+    
+    var supportsChargingState: Bool {
+        switch self {
+        case .buds2, .buds2Pro, .buds3, .buds3Pro:
+            return true
+        default:
+            return false
+        }
+    }
+    
+    var supportsGamingMode: Bool {
+        switch self {
+        case .buds2, .buds2Pro, .budsPro, .buds3, .buds3Pro:
+            return true
+        default:
+            return false
+        }
+    }
+    
+    var serviceUUID: String {
+        return "2e889123-5b00-4e0a-8fd1-5c55e0ce711c"
+    }
+    
+    var maximumAmbientVolume: Int {
+        return 2
+    }
+}
+
+// MARK: - EQ Preset
+enum EQPreset: String, CaseIterable {
+    case normal = "Normal"
+    case bassBoost = "Bass Boost"
+    case soft = "Soft"
+    case dynamic = "Dynamic"
+    case clear = "Clear"
+    case trebleBoost = "Treble Boost"
+    
+    var id: Int {
+        switch self {
+        case .normal: return 0
+        case .bassBoost: return 1
+        case .soft: return 2
+        case .dynamic: return 3
+        case .clear: return 4
+        case .trebleBoost: return 5
+        }
+    }
+}
+
+// MARK: - Noise Control Mode
+enum NoiseControlMode: String, CaseIterable {
+    case off = "Off"
+    case ambient = "Ambient Sound"
+    case anc = "Active Noise Canceling"
+    
+    var id: Int {
+        switch self {
+        case .off: return 0
+        case .ambient: return 1
+        case .anc: return 2
+        }
+    }
+}
+
+// MARK: - Device Side
+enum DeviceSide {
+    case left
+    case right
+}
+
+// MARK: - Placement State
+enum PlacementState: String {
+    case idle = "Idle"
+    case wearing = "Wearing"
+    case charging = "Charging"
+    case inCase = "In Case"
+    case unknown = "Unknown"
+}
+
+// MARK: - Buds Device
+struct BudsDevice: Identifiable {
+    let id = UUID()
+    let name: String
+    let uuid: UUID
+    let peripheral: CBPeripheral?
+    let rssi: Int
+    var model: DeviceModel = .buds2
+}
+
+// MARK: - Bluetooth Manager
 class BluetoothManager: NSObject, ObservableObject {
-    // MARK: - Published Properties
     @Published var isScanning = false
     @Published var isConnected = false
     @Published var discoveredDevices: [BudsDevice] = []
     @Published var errorMessage: String?
     
-    // Device Status
+    // Battery
     @Published var batteryLeft: Int = 0
     @Published var batteryRight: Int = 0
     @Published var batteryCase: Int = 0
     @Published var isLeftCharging = false
     @Published var isRightCharging = false
     @Published var isCaseCharging = false
+    
+    // Status
     @Published var isLeftWearing = false
     @Published var isRightWearing = false
     @Published var isCoupled = false
@@ -33,33 +264,21 @@ class BluetoothManager: NSObject, ObservableObject {
     @Published var firmwareVersion = "Unknown"
     @Published var serialNumber = "Unknown"
     @Published var deviceColor = "Unknown"
+    @Published var currentModel: DeviceModel = .buds2
     
-    // MARK: - Private Properties
     private var centralManager: CBCentralManager!
     private var connectedPeripheral: CBPeripheral?
     private var sppCharacteristic: CBCharacteristic?
     private var currentDevice: BudsDevice?
     
-    // Galaxy Buds2 Service UUIDs
     private let sppServiceUUID = CBUUID(string: "2e889123-5b00-4e0a-8fd1-5c55e0ce711c")
     private let sppCharacteristicUUID = CBUUID(string: "2e889124-5b00-4e0a-8fd1-5c55e0ce711c")
     
-    // Legacy service UUIDs for fallback
-    private let legacyServiceUUIDs: [CBUUID] = [
-        CBUUID(string: "00001101-0000-1000-8000-00805F9B34FB"), // Standard SPP
-        CBUUID(string: "2e889123-5b00-4e0a-8fd1-5c55e0ce711c")  // Buds2 specific
-    ]
-    
-    private var messageBuffer = Data()
-    private var cancellables = Set<AnyCancellable>()
-    
-    // MARK: - Initialization
     override init() {
         super.init()
         centralManager = CBCentralManager(delegate: self, queue: .main)
     }
     
-    // MARK: - Public Methods
     func startScanning() {
         guard centralManager.state == .poweredOn else {
             errorMessage = "Bluetooth is not powered on"
@@ -70,13 +289,11 @@ class BluetoothManager: NSObject, ObservableObject {
         errorMessage = nil
         discoveredDevices.removeAll()
         
-        // Scan for devices with Galaxy Buds2 service or general Bluetooth devices
         centralManager.scanForPeripherals(
-            withServices: nil, // Scan all devices to find Buds2 by name
+            withServices: nil,
             options: [CBCentralManagerScanOptionAllowDuplicatesKey: false]
         )
         
-        // Stop scanning after 10 seconds
         DispatchQueue.main.asyncAfter(deadline: .now() + 10) { [weak self] in
             self?.stopScanning()
         }
@@ -98,7 +315,6 @@ class BluetoothManager: NSObject, ObservableObject {
         currentDevice = device
         connectedPeripheral = peripheral
         peripheral.delegate = self
-        
         centralManager.connect(peripheral, options: nil)
     }
     
@@ -109,97 +325,11 @@ class BluetoothManager: NSObject, ObservableObject {
         resetState()
     }
     
-    // MARK: - Send Commands
-    func sendMessage(_ message: SPPMessage) {
-        guard let peripheral = connectedPeripheral,
-              let characteristic = sppCharacteristic else {
-            print("Cannot send message: not connected")
-            return
-        }
-        
-        let data = message.encode()
-        peripheral.writeValue(data, for: characteristic, type: .withoutResponse)
-    }
-    
-    func requestStatusUpdate() {
-        let message = SPPMessage(
-            id: .statusUpdated,
-            type: .request,
-            payload: []
-        )
-        sendMessage(message)
-    }
-    
-    func setEqualizer(preset: EQPreset) {
-        let message = MessageEncoder.encodeEqualizer(preset: preset)
-        sendMessage(message)
-        currentEQPreset = preset
-    }
-    
-    func setAmbientSound(enabled: Bool) {
-        let message = MessageEncoder.encodeAmbientMode(enabled: enabled)
-        sendMessage(message)
-        isAmbientSoundOn = enabled
-    }
-    
-    func setAmbientVolume(_ volume: Int) {
-        let message = MessageEncoder.encodeAmbientVolume(volume: volume)
-        sendMessage(message)
-        ambientVolume = volume
-    }
-    
-    func setTouchpadLock(_ locked: Bool) {
-        let message = MessageEncoder.encodeTouchpadLock(locked: locked)
-        sendMessage(message)
-        isTouchpadLocked = locked
-    }
-    
-    func setNoiseControl(mode: NoiseControlMode) {
-        // Buds2 uses ambient mode for noise control
-        switch mode {
-        case .off:
-            setAmbientSound(enabled: false)
-        case .ambient:
-            setAmbientSound(enabled: true)
-        case .anc:
-            // ANC is not available on standard Buds2, only on Buds2 Pro
-            break
-        }
-        noiseControlMode = mode
-    }
-    
-    func findMyBuds(start: Bool) {
-        let message = start ?
-            SPPMessage(id: .findMyEarbudsStart, type: .request, payload: []) :
-            SPPMessage(id: .findMyEarbudsStop, type: .request, payload: [])
-        sendMessage(message)
-    }
-    
-    func setGamingMode(_ enabled: Bool) {
-        let message = MessageEncoder.encodeGamingMode(enabled: enabled)
-        sendMessage(message)
-        isGamingModeOn = enabled
-    }
-    
-    func updateTime() {
-        let message = MessageEncoder.encodeUpdateTime()
-        sendMessage(message)
-    }
-    
-    func sendManagerInfo() {
-        let message = MessageEncoder.encodeManagerInfo()
-        sendMessage(message)
-    }
-    
-    // MARK: - Private Methods
     private func resetState() {
         isConnected = false
         connectedPeripheral = nil
         sppCharacteristic = nil
         currentDevice = nil
-        messageBuffer.removeAll()
-        
-        // Reset status
         batteryLeft = 0
         batteryRight = 0
         batteryCase = 0
@@ -209,85 +339,173 @@ class BluetoothManager: NSObject, ObservableObject {
         isLeftWearing = false
         isRightWearing = false
         isAmbientSoundOn = false
+        ambientVolume = 0
         isTouchpadLocked = false
         currentEQPreset = .normal
         noiseControlMode = .off
+        isGamingModeOn = false
         firmwareVersion = "Unknown"
         serialNumber = "Unknown"
+        deviceColor = "Unknown"
     }
     
-    private func processReceivedData(_ data: Data) {
-        messageBuffer.append(data)
+    // MARK: - Send Commands
+    
+    private func sendMessage(_ message: SPPMessage) {
+        guard let characteristic = sppCharacteristic,
+              let peripheral = connectedPeripheral else { return }
         
-        // Try to decode messages from buffer
-        while messageBuffer.count >= 6 {
-            do {
-                let (message, consumed) = try SPPMessage.decode(from: messageBuffer)
-                handleMessage(message)
-                messageBuffer.removeFirst(consumed)
-            } catch SPPError.incompletePacket {
-                // Need more data
-                break
-            } catch {
-                // Invalid packet, try to find next SOM
-                if let somIndex = messageBuffer.dropFirst().firstIndex(of: SPPMessage.som) {
-                    messageBuffer.removeFirst(somIndex)
-                } else {
-                    messageBuffer.removeAll()
-                }
-            }
+        let data = message.encode()
+        peripheral.writeValue(data, for: characteristic, type: .withoutResponse)
+    }
+    
+    func setEqualizer(_ preset: EQPreset) {
+        let message = SPPMessage(id: MsgId.equalizer.rawValue, payload: Data([UInt8(preset.id)]))
+        sendMessage(message)
+        currentEQPreset = preset
+    }
+    
+    func setAmbientMode(_ enabled: Bool) {
+        let message = SPPMessage(id: MsgId.setAmbientMode.rawValue, payload: Data([enabled ? 0x01 : 0x00]))
+        sendMessage(message)
+        isAmbientSoundOn = enabled
+    }
+    
+    func setAmbientVolume(_ volume: Int) {
+        let clampedVolume = max(0, min(volume, currentModel.maximumAmbientVolume))
+        let message = SPPMessage(id: MsgId.ambientVolume.rawValue, payload: Data([UInt8(clampedVolume)]))
+        sendMessage(message)
+        ambientVolume = clampedVolume
+    }
+    
+    func setTouchpadLock(_ locked: Bool) {
+        let message = SPPMessage(id: MsgId.lockTouchpad.rawValue, payload: Data([locked ? 0x01 : 0x00]))
+        sendMessage(message)
+        isTouchpadLocked = locked
+    }
+    
+    func setNoiseControl(_ mode: NoiseControlMode) {
+        guard currentModel.supportsNoiseControl else { return }
+        let message = SPPMessage(id: MsgId.noiseControl.rawValue, payload: Data([UInt8(mode.id)]))
+        sendMessage(message)
+        noiseControlMode = mode
+    }
+    
+    func setGamingMode(_ enabled: Bool) {
+        guard currentModel.supportsGamingMode else { return }
+        let message = SPPMessage(id: MsgId.gameMode.rawValue, payload: Data([enabled ? 0x01 : 0x00]))
+        sendMessage(message)
+        isGamingModeOn = enabled
+    }
+    
+    func startFindMyEarbuds() {
+        let message = SPPMessage(id: MsgId.findMyEarbudsStart.rawValue, payload: Data())
+        sendMessage(message)
+    }
+    
+    func stopFindMyEarbuds() {
+        let message = SPPMessage(id: MsgId.findMyEarbudsStop.rawValue, payload: Data())
+        sendMessage(message)
+    }
+    
+    // MARK: - Decode Messages
+    
+    private func decodeMessage(_ data: Data) {
+        guard data.count >= 5 else { return }
+        guard data[0] == SPPMessage.som else { return }
+        
+        let header = (UInt16(data[1]) << 8) | UInt16(data[2])
+        let msgId = data[3]
+        let payloadSize = Int(header & 0x07FF) - 3
+        
+        guard data.count >= 5 + payloadSize + 1 else { return }
+        
+        let payload = data.subdata(in: 4..<(4 + payloadSize))
+        
+        switch msgId {
+        case MsgId.statusUpdated.rawValue:
+            decodeStatusUpdate(payload)
+        case MsgId.extendedStatusUpdated.rawValue:
+            decodeExtendedStatusUpdate(payload)
+        case MsgId.versionInfo.rawValue:
+            decodeVersionInfo(payload)
+        case MsgId.serialNumber.rawValue:
+            decodeSerialNumber(payload)
+        case MsgId.chargingState.rawValue:
+            decodeChargingState(payload)
+        case MsgId.noiseControl.rawValue:
+            decodeNoiseControl(payload)
+        default:
+            break
         }
     }
     
-    private func handleMessage(_ message: SPPMessage) {
-        DispatchQueue.main.async { [weak self] in
-            guard let self = self else { return }
-            
-            switch message.id {
-            case .statusUpdated:
-                if let status = MessageDecoder.decodeStatusUpdate(message) {
-                    self.batteryLeft = status.batteryL
-                    self.batteryRight = status.batteryR
-                    self.batteryCase = status.batteryCase
-                    self.isLeftCharging = status.isLeftCharging
-                    self.isRightCharging = status.isRightCharging
-                    self.isCaseCharging = status.isCaseCharging
-                    self.isLeftWearing = status.placementL == .wearing
-                    self.isRightWearing = status.placementR == .wearing
-                    self.isCoupled = status.isCoupled
-                    self.mainConnection = status.mainConnection
-                }
-                
-            case .extendedStatusUpdated:
-                if let status = MessageDecoder.decodeExtendedStatusUpdate(message) {
-                    self.batteryLeft = status.batteryL
-                    self.batteryRight = status.batteryR
-                    self.batteryCase = status.batteryCase
-                    self.isAmbientSoundOn = status.ambientSoundEnabled
-                    self.ambientVolume = status.ambientVolume
-                    self.isTouchpadLocked = status.touchLock
-                    self.currentEQPreset = EQPreset(rawValue: status.equalizerMode) ?? .normal
-                    
-                    // Send acknowledgment
-                    self.sendManagerInfo()
-                }
-                
-            case .acknowledgement:
-                print("Received acknowledgement")
-                
-            case .versionInfo:
-                if let version = MessageDecoder.decodeVersionInfo(message) {
-                    self.firmwareVersion = version
-                }
-                
-            case .serialNumber:
-                if let serial = MessageDecoder.decodeSerialNumber(message) {
-                    self.serialNumber = serial
-                }
-                
-            default:
-                print("Received message: \(message.id)")
-            }
+    private func decodeStatusUpdate(_ payload: Data) {
+        guard payload.count >= 7 else { return }
+        
+        batteryLeft = Int(payload[1])
+        batteryRight = Int(payload[2])
+        isCoupled = payload[3] != 0
+        mainConnection = payload[4] == 1 ? .left : .right
+        
+        let placementByte = payload[5]
+        let leftPlacement = Int((placementByte & 0xF0) >> 4)
+        let rightPlacement = Int(placementByte & 0x0F)
+        
+        isLeftWearing = leftPlacement == 1
+        isRightWearing = rightPlacement == 1
+        
+        if payload.count >= 8 && currentModel.supportsCaseBattery {
+            batteryCase = Int(payload[6])
+        }
+        
+        if payload.count >= 9 && currentModel.supportsChargingState {
+            let chargingByte = payload[7]
+            isLeftCharging = ((chargingByte >> 4) & 0x01) != 0
+            isRightCharging = ((chargingByte >> 2) & 0x01) != 0
+            isCaseCharging = (chargingByte & 0x01) != 0
+        }
+    }
+    
+    private func decodeExtendedStatusUpdate(_ payload: Data) {
+        guard payload.count >= 18 else { return }
+        
+        isAmbientSoundOn = payload[8] != 0
+        ambientVolume = Int(payload[17])
+        isTouchpadLocked = payload[12] != 0
+        
+        if payload[11] < 6 {
+            currentEQPreset = EQPreset.allCases[Int(payload[11])]
+        }
+    }
+    
+    private func decodeVersionInfo(_ payload: Data) {
+        if let version = String(bytes: payload, encoding: .utf8) {
+            firmwareVersion = version.trimmingCharacters(in: .controlCharacters)
+        }
+    }
+    
+    private func decodeSerialNumber(_ payload: Data) {
+        if let serial = String(bytes: payload, encoding: .utf8) {
+            serialNumber = serial.trimmingCharacters(in: .controlCharacters)
+        }
+    }
+    
+    private func decodeChargingState(_ payload: Data) {
+        guard payload.count >= 1 else { return }
+        let chargingByte = payload[0]
+        isLeftCharging = ((chargingByte >> 4) & 0x01) != 0
+        isRightCharging = ((chargingByte >> 2) & 0x01) != 0
+        isCaseCharging = (chargingByte & 0x01) != 0
+    }
+    
+    private func decodeNoiseControl(_ payload: Data) {
+        guard payload.count >= 1 else { return }
+        switch payload[0] {
+        case 0x00: noiseControlMode = .off
+        case 0x01: noiseControlMode = .ambient
+        case 0x02: noiseControlMode = .anc
+        default: break
         }
     }
 }
@@ -295,47 +513,35 @@ class BluetoothManager: NSObject, ObservableObject {
 // MARK: - CBCentralManagerDelegate
 extension BluetoothManager: CBCentralManagerDelegate {
     func centralManagerDidUpdateState(_ central: CBCentralManager) {
-        switch central.state {
-        case .poweredOn:
-            print("Bluetooth is powered on")
-        case .poweredOff:
-            errorMessage = "Bluetooth is turned off"
-        case .unsupported:
-            errorMessage = "Bluetooth is not supported on this device"
-        case .unauthorized:
-            errorMessage = "Bluetooth permission denied"
-        default:
-            errorMessage = "Bluetooth unavailable"
+        if central.state != .poweredOn {
+            errorMessage = "Bluetooth is not available"
         }
     }
     
-    func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String : Any], rssi RSSI: NSNumber) {
-        guard let name = peripheral.name else { return }
+    func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String: Any], rssi RSSI: NSNumber) {
+        let name = peripheral.name ?? "Unknown Device"
         
-        // Filter for Galaxy Buds devices
-        let budsKeywords = ["Buds2", "Galaxy Buds", "Buds Pro", "Buds Live", "Buds FE"]
+        // Check if it's a Galaxy Buds device
+        let budsKeywords = ["Buds2", "Galaxy Buds", "Buds Pro", "Buds Live", "Buds+", "Buds3"]
         let isBudsDevice = budsKeywords.contains { name.contains($0) }
         
         if isBudsDevice {
             let device = BudsDevice(
-                id: peripheral.identifier.uuidString,
                 name: name,
                 uuid: peripheral.identifier,
                 peripheral: peripheral,
                 rssi: RSSI.intValue
             )
             
-            DispatchQueue.main.async { [weak self] in
-                if !(self?.discoveredDevices.contains(where: { $0.id == device.id }) ?? false) {
-                    self?.discoveredDevices.append(device)
-                }
+            if !discoveredDevices.contains(where: { $0.uuid == device.uuid }) {
+                discoveredDevices.append(device)
             }
         }
     }
     
     func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
-        print("Connected to \(peripheral.name ?? "Unknown")")
         isConnected = true
+        errorMessage = nil
         peripheral.discoverServices([sppServiceUUID])
     }
     
@@ -345,7 +551,7 @@ extension BluetoothManager: CBCentralManagerDelegate {
     }
     
     func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: Error?) {
-        print("Disconnected from \(peripheral.name ?? "Unknown")")
+        isConnected = false
         resetState()
     }
 }
@@ -353,9 +559,12 @@ extension BluetoothManager: CBCentralManagerDelegate {
 // MARK: - CBPeripheralDelegate
 extension BluetoothManager: CBPeripheralDelegate {
     func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: Error?) {
-        guard let services = peripheral.services else { return }
+        guard error == nil else {
+            errorMessage = "Service discovery failed"
+            return
+        }
         
-        for service in services {
+        for service in peripheral.services ?? [] {
             if service.uuid == sppServiceUUID {
                 peripheral.discoverCharacteristics([sppCharacteristicUUID], for: service)
             }
@@ -363,80 +572,25 @@ extension BluetoothManager: CBPeripheralDelegate {
     }
     
     func peripheral(_ peripheral: CBPeripheral, didDiscoverCharacteristicsFor service: CBService, error: Error?) {
-        guard let characteristics = service.characteristics else { return }
+        guard error == nil else {
+            errorMessage = "Characteristic discovery failed"
+            return
+        }
         
-        for characteristic in characteristics {
+        for characteristic in service.characteristics ?? [] {
             if characteristic.uuid == sppCharacteristicUUID {
                 sppCharacteristic = characteristic
                 peripheral.setNotifyValue(true, for: characteristic)
                 
                 // Request initial status
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
-                    self?.updateTime()
-                    self?.requestStatusUpdate()
-                }
+                let statusMsg = SPPMessage(id: MsgId.managerInfo.rawValue, payload: Data())
+                sendMessage(statusMsg)
             }
         }
     }
     
     func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
-        guard let data = characteristic.value else { return }
-        processReceivedData(data)
+        guard error == nil, let data = characteristic.value else { return }
+        decodeMessage(data)
     }
-    
-    func peripheral(_ peripheral: CBPeripheral, didUpdateNotificationStateFor characteristic: CBCharacteristic, error: Error?) {
-        if let error = error {
-            print("Failed to enable notifications: \(error.localizedDescription)")
-        } else {
-            print("Notifications enabled for \(characteristic.uuid)")
-        }
-    }
-}
-
-// MARK: - Supporting Types
-struct BudsDevice: Identifiable {
-    let id: String
-    let name: String
-    let uuid: UUID
-    let peripheral: CBPeripheral?
-    let rssi: Int
-}
-
-enum DeviceSide {
-    case left
-    case right
-}
-
-enum EQPreset: String, CaseIterable {
-    case normal = "Normal"
-    case bassBoost = "Bass Boost"
-    case soft = "Soft"
-    case dynamic = "Dynamic"
-    case clear = "Clear"
-    case trebleBoost = "Treble Boost"
-    
-    var id: Int {
-        switch self {
-        case .normal: return 0
-        case .bassBoost: return 1
-        case .soft: return 2
-        case .dynamic: return 3
-        case .clear: return 4
-        case .trebleBoost: return 5
-        }
-    }
-}
-
-enum NoiseControlMode: String, CaseIterable {
-    case off = "Off"
-    case ambient = "Ambient"
-    case anc = "ANC"
-}
-
-enum PlacementState {
-    case idle
-    case wearing
-    case charging
-    case inCase
-    case unknown
 }
