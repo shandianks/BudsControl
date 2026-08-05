@@ -20,18 +20,29 @@ jobs:
       run: |
         xcodegen generate
     
+    - name: List source files
+      run: |
+        echo "=== Source files in project ==="
+        ls -la
+        echo "=== Contents of BudsControl.xcodeproj ==="
+        cat BudsControl.xcodeproj/project.pbxproj | grep -A2 "buildFiles\|PBXSourcesBuildPhase" | head -50
+    
     - name: Build iOS App
       run: |
         xcodebuild -project BudsControl.xcodeproj \
           -scheme BudsControl \
           -destination 'platform=iOS Simulator,name=iPhone 15' \
           -configuration Release \
-          build
-        echo "=== Build exit code: $? ==="
+          build 2>&1 | tee build-output.txt
+        BUILD_STATUS=${PIPESTATUS[0]}
+        echo "=== Build exit code: $BUILD_STATUS ==="
         echo "=== Searching for .app files ==="
         find . -name "*.app" -type d
         echo "=== Build products directory ==="
         ls -la ~/Library/Developer/Xcode/DerivedData/BudsControl-*/Build/Products/Release-iphonesimulator/ 2>/dev/null || echo "No derived data found"
+        echo "=== Build output (last 100 lines) ==="
+        tail -100 build-output.txt
+        exit $BUILD_STATUS
     
     - name: Package .app
       if: success()
@@ -58,13 +69,21 @@ jobs:
         path: BudsControl.ipa
         retention-days: 7
     
+    - name: Upload Build Output on Failure
+      if: failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-output
+        path: build-output.txt
+        retention-days: 1
+        if-no-files-found: ignore
+    
     - name: Upload Debug Logs on Failure
       if: failure()
       uses: actions/upload-artifact@v4
       with:
         name: debug-logs
         path: |
-          build-output.txt
           ~/Library/Developer/Xcode/DerivedData/BudsControl-*/Build/Products/Release-iphonesimulator/
         retention-days: 1
         if-no-files-found: ignore
