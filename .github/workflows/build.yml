@@ -27,23 +27,26 @@ jobs:
         echo "=== Contents of BudsControl.xcodeproj ==="
         cat BudsControl.xcodeproj/project.pbxproj | grep -A2 "buildFiles\|PBXSourcesBuildPhase" | head -50
     
-    - name: Build iOS App
+    - name: Build iPhone Device App
       run: |
+        set -o pipefail
         xcodebuild -project BudsControl.xcodeproj \
           -scheme BudsControl \
-          -destination 'platform=iOS Simulator,name=iPhone 17' \
+          -destination 'generic/platform=iOS' \
+          -sdk iphoneos \
           -configuration Release \
+          CODE_SIGNING_ALLOWED=NO \
+          CODE_SIGNING_REQUIRED=NO \
           build 2>&1 | tee build-output.txt
         BUILD_STATUS=${PIPESTATUS[0]}
         echo "=== Build exit code: $BUILD_STATUS ==="
         echo "=== Searching for .app files ==="
-        find . -name "*.app" -type d
+        find ~/Library/Developer/Xcode/DerivedData -name "BudsControl.app" -type d
         echo "=== Build products directory ==="
-        ls -la ~/Library/Developer/Xcode/DerivedData/BudsControl-*/Build/Products/Release-iphonesimulator/ 2>/dev/null || echo "No derived data found"
+        ls -la ~/Library/Developer/Xcode/DerivedData/BudsControl-*/Build/Products/Release-iphoneos/ 2>/dev/null || echo "No device derived data found"
         echo "=== Build output (last 100 lines) ==="
         tail -100 build-output.txt
         
-        # Save errors to file for issue creation
         if [ $BUILD_STATUS -ne 0 ]; then
           echo "BUILD_FAILED" > build-status.txt
           tail -50 build-output.txt > build-errors.txt
@@ -65,10 +68,12 @@ jobs:
           ls -la "$APP_PATH/BudsControl" 2>/dev/null || echo "No executable found"
           mkdir -p Payload
           cp -R "$APP_PATH" Payload/
-          zip -r BudsControl.ipa Payload
-          ls -lh BudsControl.ipa
+          /usr/libexec/PlistBuddy -c "Print :CFBundleSupportedPlatforms:0" "$APP_PATH/Info.plist"
+          /usr/libexec/PlistBuddy -c "Print :DTPlatformName" "$APP_PATH/Info.plist"
+          zip -r BudsControl-device-unsigned.ipa Payload
+          ls -lh BudsControl-device-unsigned.ipa
           echo "=== IPA contents ==="
-          unzip -l BudsControl.ipa | head -20
+          unzip -l BudsControl-device-unsigned.ipa | head -20
         else
           echo "ERROR: .app not found in DerivedData"
           exit 1
@@ -78,8 +83,8 @@ jobs:
       if: success()
       uses: actions/upload-artifact@v4
       with:
-        name: BudsControl-unsigned
-        path: BudsControl.ipa
+        name: BudsControl-device-unsigned
+        path: BudsControl-device-unsigned.ipa
         retention-days: 7
     
     - name: Upload Build Output on Failure
@@ -97,7 +102,7 @@ jobs:
       with:
         name: debug-logs
         path: |
-          ~/Library/Developer/Xcode/DerivedData/BudsControl-*/Build/Products/Release-iphonesimulator/
+          ~/Library/Developer/Xcode/DerivedData/BudsControl-*/Build/Products/Release-iphoneos/
         retention-days: 1
         if-no-files-found: ignore
     
