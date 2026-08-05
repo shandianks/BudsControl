@@ -5,7 +5,10 @@ targets:
     platform: iOS
     deploymentTarget: "16.0"
     sources:
-      - BudsControl
+      - path: BluetoothManager.swift
+      - path: BudsControlApp.swift
+      - path: ContentView.swift
+      - path: Assets.xcassets
     settings:
       PRODUCT_BUNDLE_IDENTIFIER: com.yourcompany.BudsControl
       SWIFT_VERSION: "5.0"
