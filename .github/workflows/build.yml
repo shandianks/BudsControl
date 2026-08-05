@@ -40,11 +40,16 @@ jobs:
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGN_IDENTITY="" \
-            PROVISIONING_PROFILE_SPECIFIER="" 2>&1 | tee build.log
+            PROVISIONING_PROFILE_SPECIFIER="" 2>&1 | tee build.log || {
+              echo "=== BUILD FAILED ==="
+              echo "=== ERROR SUMMARY ==="
+              grep -E "error:|warning:|fatal:|Build FAILED|FAILED" build.log | tail -20 || true
+              echo "=== FULL LOG (last 50 lines) ==="
+              tail -n 50 build.log
+              exit 1
+            }
           echo "=== Build succeeded ==="
-          echo "Searching for .app..."
           find build -name "*.app" -type d 2>/dev/null || echo "No .app in build/"
-          find . -name "*.app" -type d 2>/dev/null | head -10 || echo "No .app anywhere"
       
       - name: Package .app
         if: success()
@@ -59,7 +64,6 @@ jobs:
             exit 1
           fi
           echo "✅ Found app at: $APP_PATH"
-          echo "App size:"
           du -sh "$APP_PATH"
           mkdir -p artifacts
           mkdir -p Payload
@@ -71,7 +75,6 @@ jobs:
           rm -rf Payload
           echo "✅ IPA created!"
           ls -lh artifacts/
-          echo "IPA size:"
           du -sh artifacts/BudsControl-unsigned.ipa
       
       - name: Upload artifact
