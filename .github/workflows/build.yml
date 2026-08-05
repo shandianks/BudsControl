@@ -42,6 +42,13 @@ jobs:
         ls -la ~/Library/Developer/Xcode/DerivedData/BudsControl-*/Build/Products/Release-iphonesimulator/ 2>/dev/null || echo "No derived data found"
         echo "=== Build output (last 100 lines) ==="
         tail -100 build-output.txt
+        
+        # Output errors to GitHub step summary
+        echo "## Build Output (last 50 lines)" >> $GITHUB_STEP_SUMMARY
+        echo '```' >> $GITHUB_STEP_SUMMARY
+        tail -50 build-output.txt >> $GITHUB_STEP_SUMMARY
+        echo '```' >> $GITHUB_STEP_SUMMARY
+        
         exit $BUILD_STATUS
     
     - name: Package .app
