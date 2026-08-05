@@ -270,6 +270,7 @@ class BluetoothManager: NSObject, ObservableObject {
     private var connectedPeripheral: CBPeripheral?
     private var sppCharacteristic: CBCharacteristic?
     private var currentDevice: BudsDevice?
+    private var pendingConnection = false
     
     private let sppServiceUUID = CBUUID(string: "2e889123-5b00-4e0a-8fd1-5c55e0ce711c")
     private let sppCharacteristicUUID = CBUUID(string: "2e889124-5b00-4e0a-8fd1-5c55e0ce711c")
@@ -314,6 +315,9 @@ class BluetoothManager: NSObject, ObservableObject {
         
         currentDevice = device
         connectedPeripheral = peripheral
+        pendingConnection = true
+        isConnected = false
+        errorMessage = "Connecting to \(device.name)…"
         peripheral.delegate = self
         centralManager.connect(peripheral, options: nil)
     }
@@ -327,6 +331,7 @@ class BluetoothManager: NSObject, ObservableObject {
     
     private func resetState() {
         isConnected = false
+        pendingConnection = false
         connectedPeripheral = nil
         sppCharacteristic = nil
         currentDevice = nil
@@ -356,7 +361,10 @@ class BluetoothManager: NSObject, ObservableObject {
               let peripheral = connectedPeripheral else { return }
         
         let data = message.encode()
-        peripheral.writeValue(data, for: characteristic, type: .withoutResponse)
+        let writeType: CBCharacteristicWriteType = characteristic.properties.contains(.write)
+            ? .withResponse
+            : .withoutResponse
+        peripheral.writeValue(data, for: characteristic, type: writeType)
     }
     
     func setEqualizer(_ preset: EQPreset) {
@@ -540,9 +548,11 @@ extension BluetoothManager: CBCentralManagerDelegate {
     }
     
     func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
-        isConnected = true
-        errorMessage = nil
-        peripheral.discoverServices([sppServiceUUID])
+        pendingConnection = true
+        errorMessage = "Connected; discovering Buds control service…"
+        // Do not restrict discovery to one guessed UUID. Firmware revisions can
+        // expose the SPP service differently on iOS.
+        peripheral.discoverServices(nil)
     }
     
     func centralManager(_ central: CBCentralManager, didFailToConnect peripheral: CBPeripheral, error: Error?) {
@@ -560,32 +570,52 @@ extension BluetoothManager: CBCentralManagerDelegate {
 extension BluetoothManager: CBPeripheralDelegate {
     func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: Error?) {
         guard error == nil else {
-            errorMessage = "Service discovery failed"
+            errorMessage = "Service discovery failed: \(error!.localizedDescription)"
             return
         }
-        
-        for service in peripheral.services ?? [] {
-            if service.uuid == sppServiceUUID {
-                peripheral.discoverCharacteristics([sppCharacteristicUUID], for: service)
-            }
+
+        let services = peripheral.services ?? []
+        guard !services.isEmpty else {
+            errorMessage = "Buds returned no Bluetooth services"
+            return
+        }
+
+        // Discover every characteristic, then select the control channel by
+        // UUID/properties. This supports firmware revisions with UUID aliases.
+        for service in services {
+            peripheral.discoverCharacteristics(nil, for: service)
         }
     }
     
     func peripheral(_ peripheral: CBPeripheral, didDiscoverCharacteristicsFor service: CBService, error: Error?) {
         guard error == nil else {
-            errorMessage = "Characteristic discovery failed"
+            errorMessage = "Characteristic discovery failed: \(error!.localizedDescription)"
             return
         }
-        
+
         for characteristic in service.characteristics ?? [] {
-            if characteristic.uuid == sppCharacteristicUUID {
+            let isKnownSPP = characteristic.uuid == sppCharacteristicUUID
+            let canWrite = characteristic.properties.contains(.write) || characteristic.properties.contains(.writeWithoutResponse)
+            let canNotify = characteristic.properties.contains(.notify) || characteristic.properties.contains(.indicate)
+
+            if isKnownSPP || (canWrite && canNotify) {
                 sppCharacteristic = characteristic
-                peripheral.setNotifyValue(true, for: characteristic)
-                
-                // Request initial status
+                if canNotify {
+                    peripheral.setNotifyValue(true, for: characteristic)
+                }
+
+                isConnected = true
+                pendingConnection = false
+                errorMessage = nil
+
                 let statusMsg = SPPMessage(id: MsgId.managerInfo.rawValue, payload: Data())
                 sendMessage(statusMsg)
+                return
             }
+        }
+
+        if sppCharacteristic == nil {
+            errorMessage = "Connected, but no writable Buds control characteristic was found"
         }
     }
     
