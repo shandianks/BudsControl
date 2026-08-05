@@ -1,0 +1,27 @@
+﻿2026-08-04T14:20:07.8322580Z Node 20 is being deprecated. This workflow is running with Node 24 by default. If you need to temporarily use Node 20, you can set the ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true environment variable. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+2026-08-04T14:20:07.8323690Z ##[group]Run actions/upload-artifact@v4
+2026-08-04T14:20:07.8324000Z with:
+2026-08-04T14:20:07.8324200Z   name: BudsControl-unsigned
+2026-08-04T14:20:07.8324440Z   path: artifacts/BudsControl-unsigned.ipa
+2026-08-04T14:20:07.8324680Z   retention-days: 30
+2026-08-04T14:20:07.8324870Z   if-no-files-found: warn
+2026-08-04T14:20:07.8325050Z   compression-level: 6
+2026-08-04T14:20:07.8325270Z   overwrite: false
+2026-08-04T14:20:07.8325500Z   include-hidden-files: false
+2026-08-04T14:20:07.8325760Z env:
+2026-08-04T14:20:07.8325950Z   MD_APPLE_SDK_ROOT: /Applications/Xcode_26.6.app
+2026-08-04T14:20:07.8326200Z ##[endgroup]
+2026-08-04T14:20:08.3873480Z (node:2163) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-08-04T14:20:08.3875540Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-08-04T14:20:08.3958090Z With the provided path, there will be 1 file uploaded
+2026-08-04T14:20:08.3972990Z Artifact name is valid!
+2026-08-04T14:20:08.3973520Z Root directory input is valid!
+2026-08-04T14:20:08.7955680Z (node:2163) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-08-04T14:20:08.8276890Z Beginning upload of artifact content to blob storage
+2026-08-04T14:20:09.0862950Z Uploaded bytes 1244
+2026-08-04T14:20:09.1640290Z Finished uploading artifact content to blob storage!
+2026-08-04T14:20:09.1658220Z SHA256 digest of uploaded artifact zip is 32a1a9230a7c3a12a8ddb6741e36659f7069c7eff6e9b96387693e4ce6aa41be
+2026-08-04T14:20:09.1659870Z Finalizing artifact upload
+2026-08-04T14:20:09.4420400Z Artifact BudsControl-unsigned.zip successfully finalized. Artifact ID 8896007719
+2026-08-04T14:20:09.4422310Z Artifact BudsControl-unsigned has been successfully uploaded! Final size is 1244 bytes. Artifact ID is 8896007719
+2026-08-04T14:20:09.4435690Z Artifact download URL: https://github.com/shandianks/BudsControl/actions/runs/30918333292/artifacts/8896007719

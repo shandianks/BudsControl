@@ -1,0 +1,74 @@
+﻿2026-08-04T14:14:24.2997400Z ##[group]Run set -x
+2026-08-04T14:14:24.2997750Z [36;1mset -x[0m
+2026-08-04T14:14:24.2998000Z [36;1mecho "Searching for BudsControl.app..."[0m
+2026-08-04T14:14:24.2998340Z [36;1mAPP_PATH=""[0m
+2026-08-04T14:14:24.2998570Z [36;1m[0m
+2026-08-04T14:14:24.2998800Z [36;1m# Try multiple search strategies[0m
+2026-08-04T14:14:24.2999250Z [36;1mfor path in $(find build -name "BudsControl.app" -type d 2>/dev/null); do[0m
+2026-08-04T14:14:24.2999680Z [36;1m  APP_PATH="$path"[0m
+2026-08-04T14:14:24.2999960Z [36;1m  break[0m
+2026-08-04T14:14:24.3000140Z [36;1mdone[0m
+2026-08-04T14:14:24.3000320Z [36;1m[0m
+2026-08-04T14:14:24.3000490Z [36;1mif [ -z "$APP_PATH" ]; then[0m
+2026-08-04T14:14:24.3000910Z [36;1m  for path in $(find . -path "*/Build/Products/*" -name "BudsControl.app" -type d 2>/dev/null); do[0m
+2026-08-04T14:14:24.3001330Z [36;1m    APP_PATH="$path"[0m
+2026-08-04T14:14:24.3001550Z [36;1m    break[0m
+2026-08-04T14:14:24.3001740Z [36;1m  done[0m
+2026-08-04T14:14:24.3001910Z [36;1mfi[0m
+2026-08-04T14:14:24.3002140Z [36;1m[0m
+2026-08-04T14:14:24.3002310Z [36;1mif [ -z "$APP_PATH" ]; then[0m
+2026-08-04T14:14:24.3002630Z [36;1m  for path in $(find . -name "BudsControl.app" -type d 2>/dev/null); do[0m
+2026-08-04T14:14:24.3003000Z [36;1m    APP_PATH="$path"[0m
+2026-08-04T14:14:24.3003230Z [36;1m    break[0m
+2026-08-04T14:14:24.3003460Z [36;1m  done[0m
+2026-08-04T14:14:24.3003650Z [36;1mfi[0m
+2026-08-04T14:14:24.3003790Z [36;1m[0m
+2026-08-04T14:14:24.3003970Z [36;1mif [ -z "$APP_PATH" ]; then[0m
+2026-08-04T14:14:24.3004250Z [36;1m  echo "❌ BudsControl.app not found anywhere"[0m
+2026-08-04T14:14:24.3004540Z [36;1m  echo "Current directory:"[0m
+2026-08-04T14:14:24.3004770Z [36;1m  pwd[0m
+2026-08-04T14:14:24.3005000Z [36;1m  echo "All directories in build:"[0m
+2026-08-04T14:14:24.3005280Z [36;1m  find build -type d 2>/dev/null | head -50[0m
+2026-08-04T14:14:24.3005710Z [36;1m  exit 1[0m
+2026-08-04T14:14:24.3005900Z [36;1mfi[0m
+2026-08-04T14:14:24.3006080Z [36;1m[0m
+2026-08-04T14:14:24.3006640Z [36;1mecho "✅ Found app at: $APP_PATH"[0m
+2026-08-04T14:14:24.3006920Z [36;1mmkdir -p artifacts[0m
+2026-08-04T14:14:24.3007110Z [36;1m[0m
+2026-08-04T14:14:24.3007290Z [36;1m# Create proper IPA structure[0m
+2026-08-04T14:14:24.3007530Z [36;1mmkdir -p Payload[0m
+2026-08-04T14:14:24.3007770Z [36;1mcp -R "$APP_PATH" Payload/[0m
+2026-08-04T14:14:24.3008050Z [36;1mcd Payload[0m
+2026-08-04T14:14:24.3008260Z [36;1mls -la[0m
+2026-08-04T14:14:24.3008430Z [36;1mcd ..[0m
+2026-08-04T14:14:24.3008630Z [36;1m[0m
+2026-08-04T14:14:24.3008850Z [36;1mzip -r artifacts/BudsControl-unsigned.ipa Payload[0m
+2026-08-04T14:14:24.3009130Z [36;1mrm -rf Payload[0m
+2026-08-04T14:14:24.3009330Z [36;1m[0m
+2026-08-04T14:14:24.3009600Z [36;1mecho "✅ IPA created successfully!"[0m
+2026-08-04T14:14:24.3009840Z [36;1mls -lh artifacts/[0m
+2026-08-04T14:14:24.3098350Z shell: /bin/bash -e {0}
+2026-08-04T14:14:24.3098720Z env:
+2026-08-04T14:14:24.3099000Z   MD_APPLE_SDK_ROOT: /Applications/Xcode_26.6.app
+2026-08-04T14:14:24.3099320Z ##[endgroup]
+2026-08-04T14:14:24.4036130Z + echo 'Searching for BudsControl.app...'
+2026-08-04T14:14:24.4037050Z Searching for BudsControl.app...
+2026-08-04T14:14:24.4123480Z + APP_PATH=
+2026-08-04T14:14:24.4216780Z ++ find build -name BudsControl.app -type d
+2026-08-04T14:14:24.4218500Z + '[' -z '' ']'
+2026-08-04T14:14:24.4220260Z ++ find . -path '*/Build/Products/*' -name BudsControl.app -type d
+2026-08-04T14:14:24.4285090Z + '[' -z '' ']'
+2026-08-04T14:14:24.4297740Z ++ find . -name BudsControl.app -type d
+2026-08-04T14:14:24.4399570Z + '[' -z '' ']'
+2026-08-04T14:14:24.4401020Z ❌ BudsControl.app not found anywhere
+2026-08-04T14:14:24.4401610Z + echo '❌ BudsControl.app not found anywhere'
+2026-08-04T14:14:24.4401890Z Current directory:
+2026-08-04T14:14:24.4403840Z + echo 'Current directory:'
+2026-08-04T14:14:24.4405090Z /Users/runner/work/BudsControl/BudsControl
+2026-08-04T14:14:24.4408630Z + pwd
+2026-08-04T14:14:24.4408850Z All directories in build:
+2026-08-04T14:14:24.4411940Z + echo 'All directories in build:'
+2026-08-04T14:14:24.4425760Z + find build -type d
+2026-08-04T14:14:24.4444120Z + head -50
+2026-08-04T14:14:24.4465600Z + exit 1
+2026-08-04T14:14:24.4494050Z ##[error]Process completed with exit code 1.

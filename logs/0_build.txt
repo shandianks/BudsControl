@@ -1,0 +1,303 @@
+﻿2026-08-04T14:14:11.4886260Z Current runner version: '2.336.0'
+2026-08-04T14:14:11.4901670Z ##[group]Runner Image Provisioner
+2026-08-04T14:14:11.4902220Z Hosted Compute Agent
+2026-08-04T14:14:11.4903090Z Version: 20260707.563
+2026-08-04T14:14:11.4903490Z Commit: 02667638d2b423fbc733a8e32a88b44996a3ba6e
+2026-08-04T14:14:11.4903940Z Build Date: 2026-07-07T19:33:50Z
+2026-08-04T14:14:11.4904360Z Worker ID: {5a9ae651-5e3a-4f63-9f00-f109b97e29c9}
+2026-08-04T14:14:11.4904900Z Azure Region: westus
+2026-08-04T14:14:11.4905240Z ##[endgroup]
+2026-08-04T14:14:11.4906180Z ##[group]Operating System
+2026-08-04T14:14:11.4906620Z macOS
+2026-08-04T14:14:11.4906920Z 26.5.2
+2026-08-04T14:14:11.4907300Z 25F84
+2026-08-04T14:14:11.4907630Z ##[endgroup]
+2026-08-04T14:14:11.4907990Z ##[group]Runner Image
+2026-08-04T14:14:11.4908420Z Image: macos-26-arm64
+2026-08-04T14:14:11.4908770Z Version: 20260728.0273.1
+2026-08-04T14:14:11.4909570Z Included Software: https://github.com/actions/runner-images/blob/macos-26-arm64/20260728.0273/images/macos/macos-26-arm64-Readme.md
+2026-08-04T14:14:11.4913170Z Image Release: https://github.com/actions/runner-images/releases/tag/macos-26-arm64%2F20260728.0273
+2026-08-04T14:14:11.4915080Z ##[endgroup]
+2026-08-04T14:14:11.4917160Z ##[group]GITHUB_TOKEN Permissions
+2026-08-04T14:14:11.4922440Z Contents: read
+2026-08-04T14:14:11.4922880Z Metadata: read
+2026-08-04T14:14:11.4923240Z Packages: read
+2026-08-04T14:14:11.4923610Z ##[endgroup]
+2026-08-04T14:14:11.4925420Z Secret source: Actions
+2026-08-04T14:14:11.4926080Z Prepare workflow directory
+2026-08-04T14:14:11.5270010Z Prepare all required actions
+2026-08-04T14:14:11.5310970Z Getting action download info
+2026-08-04T14:14:11.9954230Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+2026-08-04T14:14:12.2658350Z Download action repository 'maxim-lobanov/setup-xcode@v1' (SHA:ed7a3b1fda3918c0306d1b724322adc0b8cc0a90)
+2026-08-04T14:14:12.6664550Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+2026-08-04T14:14:12.9132350Z Complete job name: build
+2026-08-04T14:14:12.9724830Z Node 20 is being deprecated. This workflow is running with Node 24 by default. If you need to temporarily use Node 20, you can set the ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true environment variable. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+2026-08-04T14:14:12.9733930Z ##[group]Run actions/checkout@v4
+2026-08-04T14:14:12.9734570Z with:
+2026-08-04T14:14:12.9734970Z   repository: shandianks/BudsControl
+2026-08-04T14:14:12.9739440Z   token: ***
+2026-08-04T14:14:12.9739790Z   ssh-strict: true
+2026-08-04T14:14:12.9740150Z   ssh-user: git
+2026-08-04T14:14:12.9740520Z   persist-credentials: true
+2026-08-04T14:14:12.9741350Z   clean: true
+2026-08-04T14:14:12.9741710Z   sparse-checkout-cone-mode: true
+2026-08-04T14:14:12.9742140Z   fetch-depth: 1
+2026-08-04T14:14:12.9742550Z   fetch-tags: false
+2026-08-04T14:14:12.9742920Z   show-progress: true
+2026-08-04T14:14:12.9743740Z   lfs: false
+2026-08-04T14:14:12.9744200Z   submodules: false
+2026-08-04T14:14:12.9744580Z   set-safe-directory: true
+2026-08-04T14:14:12.9745490Z   allow-unsafe-pr-checkout: false
+2026-08-04T14:14:12.9746530Z ##[endgroup]
+2026-08-04T14:14:13.5538390Z Syncing repository: shandianks/BudsControl
+2026-08-04T14:14:13.5540150Z ##[group]Getting Git version info
+2026-08-04T14:14:13.5542450Z Working directory is '/Users/runner/work/BudsControl/BudsControl'
+2026-08-04T14:14:13.5545440Z [command]/opt/homebrew/bin/git version
+2026-08-04T14:14:13.5907050Z git version 2.55.0
+2026-08-04T14:14:13.5952860Z ##[endgroup]
+2026-08-04T14:14:13.5963700Z Copying '/Users/runner/.gitconfig' to '/Users/runner/work/_temp/582b1f29-b985-4cd1-9721-7da817b27d77/.gitconfig'
+2026-08-04T14:14:13.5968080Z Temporarily overriding HOME='/Users/runner/work/_temp/582b1f29-b985-4cd1-9721-7da817b27d77' before making global git config changes
+2026-08-04T14:14:13.5970030Z Adding repository directory to the temporary git global config as a safe directory
+2026-08-04T14:14:13.5972780Z [command]/opt/homebrew/bin/git config --global --add safe.directory /Users/runner/work/BudsControl/BudsControl
+2026-08-04T14:14:13.6237240Z Deleting the contents of '/Users/runner/work/BudsControl/BudsControl'
+2026-08-04T14:14:13.6245230Z ##[group]Initializing the repository
+2026-08-04T14:14:13.6260590Z [command]/opt/homebrew/bin/git init /Users/runner/work/BudsControl/BudsControl
+2026-08-04T14:14:13.6644650Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-08-04T14:14:13.6647580Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-08-04T14:14:13.6648570Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-08-04T14:14:13.6649300Z hint: call:
+2026-08-04T14:14:13.6649660Z hint:
+2026-08-04T14:14:13.6650130Z hint: 	git config --global init.defaultBranch <name>
+2026-08-04T14:14:13.6650620Z hint:
+2026-08-04T14:14:13.6651130Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-08-04T14:14:13.6651990Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-08-04T14:14:13.6652670Z hint:
+2026-08-04T14:14:13.6653030Z hint: 	git branch -m <name>
+2026-08-04T14:14:13.6653440Z hint:
+2026-08-04T14:14:13.6653960Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-08-04T14:14:13.6655370Z Initialized empty Git repository in /Users/runner/work/BudsControl/BudsControl/.git/
+2026-08-04T14:14:13.6665110Z [command]/opt/homebrew/bin/git remote add origin https://github.com/shandianks/BudsControl
+2026-08-04T14:14:13.6798650Z ##[endgroup]
+2026-08-04T14:14:13.6800690Z ##[group]Disabling automatic garbage collection
+2026-08-04T14:14:13.6803040Z [command]/opt/homebrew/bin/git config --local gc.auto 0
+2026-08-04T14:14:13.6896930Z ##[endgroup]
+2026-08-04T14:14:13.6897770Z ##[group]Setting up auth
+2026-08-04T14:14:13.6903730Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-08-04T14:14:13.6981160Z [command]/opt/homebrew/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-08-04T14:14:13.8332790Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-08-04T14:14:13.8402330Z [command]/opt/homebrew/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-08-04T14:14:13.9523040Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-08-04T14:14:13.9606310Z [command]/opt/homebrew/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-08-04T14:14:14.1245410Z [command]/opt/homebrew/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-08-04T14:14:14.1675040Z ##[endgroup]
+2026-08-04T14:14:14.1677940Z ##[group]Fetching the repository
+2026-08-04T14:14:14.1682240Z [command]/opt/homebrew/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +9692eb9d5f8febc033e23fcee1abb9986d3f5bd3:refs/remotes/origin/main
+2026-08-04T14:14:14.6491290Z From https://github.com/shandianks/BudsControl
+2026-08-04T14:14:14.6594190Z  * [new ref]         9692eb9d5f8febc033e23fcee1abb9986d3f5bd3 -> origin/main
+2026-08-04T14:14:14.6685160Z ##[endgroup]
+2026-08-04T14:14:14.6689490Z ##[group]Determining the checkout info
+2026-08-04T14:14:14.6692900Z ##[endgroup]
+2026-08-04T14:14:14.6694170Z [command]/opt/homebrew/bin/git sparse-checkout disable
+2026-08-04T14:14:14.6700040Z [command]/opt/homebrew/bin/git config --local --unset-all extensions.worktreeConfig
+2026-08-04T14:14:14.6718690Z ##[group]Checking out the ref
+2026-08-04T14:14:14.6722820Z [command]/opt/homebrew/bin/git checkout --progress --force -B main refs/remotes/origin/main
+2026-08-04T14:14:14.6945280Z Switched to a new branch 'main'
+2026-08-04T14:14:14.6951530Z branch 'main' set up to track 'origin/main'.
+2026-08-04T14:14:14.6956240Z ##[endgroup]
+2026-08-04T14:14:14.7180490Z [command]/opt/homebrew/bin/git log -1 --format=%H
+2026-08-04T14:14:14.7240450Z 9692eb9d5f8febc033e23fcee1abb9986d3f5bd3
+2026-08-04T14:14:14.7722540Z ##[group]Run maxim-lobanov/setup-xcode@v1
+2026-08-04T14:14:14.7725300Z with:
+2026-08-04T14:14:14.7726150Z   xcode-version: latest-stable
+2026-08-04T14:14:14.7726990Z ##[endgroup]
+2026-08-04T14:14:14.8701130Z Switching Xcode to version 'latest-stable'...
+2026-08-04T14:14:14.9618630Z Xcode is set to 26.6.0 (17F113)
+2026-08-04T14:14:14.9795080Z ##[group]Run xcodebuild -version
+2026-08-04T14:14:14.9796000Z [36;1mxcodebuild -version[0m
+2026-08-04T14:14:14.9852190Z shell: /bin/bash -e {0}
+2026-08-04T14:14:14.9853090Z env:
+2026-08-04T14:14:14.9853810Z   MD_APPLE_SDK_ROOT: /Applications/Xcode_26.6.app
+2026-08-04T14:14:14.9854740Z ##[endgroup]
+2026-08-04T14:14:15.1229470Z Xcode 26.6
+2026-08-04T14:14:15.1235190Z Build version 17F113
+2026-08-04T14:14:15.1351890Z ##[group]Run set -x
+2026-08-04T14:14:15.1352950Z [36;1mset -x[0m
+2026-08-04T14:14:15.1353880Z [36;1mxcodebuild -project BudsControl.xcodeproj \[0m
+2026-08-04T14:14:15.1355800Z [36;1m  -scheme BudsControl \[0m
+2026-08-04T14:14:15.1357050Z [36;1m  -sdk iphoneos \[0m
+2026-08-04T14:14:15.1362460Z [36;1m  -configuration Release \[0m
+2026-08-04T14:14:15.1364840Z [36;1m  -derivedDataPath build \[0m
+2026-08-04T14:14:15.1367480Z [36;1m  CODE_SIGNING_ALLOWED=NO \[0m
+2026-08-04T14:14:15.1369770Z [36;1m  CODE_SIGNING_REQUIRED=NO \[0m
+2026-08-04T14:14:15.1371640Z [36;1m  CODE_SIGN_IDENTITY="" \[0m
+2026-08-04T14:14:15.1374170Z [36;1m  PROVISIONING_PROFILE_SPECIFIER="" \[0m
+2026-08-04T14:14:15.1376260Z [36;1m  | tee build.log[0m
+2026-08-04T14:14:15.1377970Z [36;1mecho "=== Build completed ==="[0m
+2026-08-04T14:14:15.1379750Z [36;1mecho "Contents of build directory:"[0m
+2026-08-04T14:14:15.1380930Z [36;1mls -la build/ || echo "build/ not found"[0m
+2026-08-04T14:14:15.1381950Z [36;1mecho "=== Searching for .app ==="[0m
+2026-08-04T14:14:15.1383280Z [36;1mfind build -name "*.app" -type d 2>/dev/null || echo "No .app in build/"[0m
+2026-08-04T14:14:15.1385000Z [36;1mecho "=== Searching entire workspace ==="[0m
+2026-08-04T14:14:15.1386560Z [36;1mfind . -path "*/Build/Products/*" -name "*.app" -type d 2>/dev/null || echo "No .app in Products"[0m
+2026-08-04T14:14:15.1389640Z [36;1mfind . -name "*.app" -type d 2>/dev/null | head -10 || echo "No .app anywhere"[0m
+2026-08-04T14:14:15.1436780Z shell: /bin/bash -e {0}
+2026-08-04T14:14:15.1437480Z env:
+2026-08-04T14:14:15.1438270Z   MD_APPLE_SDK_ROOT: /Applications/Xcode_26.6.app
+2026-08-04T14:14:15.1439160Z ##[endgroup]
+2026-08-04T14:14:15.1732720Z + tee build.log
+2026-08-04T14:14:15.1738440Z + xcodebuild -project BudsControl.xcodeproj -scheme BudsControl -sdk iphoneos -configuration Release -derivedDataPath build CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY= PROVISIONING_PROFILE_SPECIFIER=
+2026-08-04T14:14:17.1731780Z Command line invocation:
+2026-08-04T14:14:17.1835670Z     /Applications/Xcode_26.6.app/Contents/Developer/usr/bin/xcodebuild -project BudsControl.xcodeproj -scheme BudsControl -sdk iphoneos -configuration Release -derivedDataPath build CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY= PROVISIONING_PROFILE_SPECIFIER=
+2026-08-04T14:14:17.1850590Z 
+2026-08-04T14:14:17.1851260Z Build settings from command line:
+2026-08-04T14:14:17.1857090Z     CODE_SIGN_IDENTITY = 
+2026-08-04T14:14:17.1857710Z     CODE_SIGNING_ALLOWED = NO
+2026-08-04T14:14:17.1858360Z     CODE_SIGNING_REQUIRED = NO
+2026-08-04T14:14:17.1959910Z     PROVISIONING_PROFILE_SPECIFIER = 
+2026-08-04T14:14:17.1980130Z     SDKROOT = iphoneos26.5
+2026-08-04T14:14:17.1992380Z 
+2026-08-04T14:14:18.6042350Z 2026-08-04 14:14:18.603 xcodebuild[1294:7183] Error Domain=NSCocoaErrorDomain Code=3840 "JSON text did not start with array or object and option to allow fragments not set. around line 1, column 0." UserInfo={NSDebugDescription=JSON text did not start with array or object and option to allow fragments not set. around line 1, column 0., NSJSONSerializationErrorIndex=0}
+2026-08-04T14:14:18.6592250Z 2026-08-04 14:14:18.649 xcodebuild[1294:7183] Writing error result bundle to /var/folders/df/djsxfhc17x95674wsm_g8s980000gn/T/ResultBundle_2026-04-08_14-14-0018.xcresult
+2026-08-04T14:14:19.1549080Z xcodebuild: error: Unable to read project 'BudsControl.xcodeproj'.
+2026-08-04T14:14:19.1551240Z 	Reason: The project ‘BudsControl’ is damaged and cannot be opened due to a parse error. Examine the project file for invalid edits or unresolved source control conflicts.
+2026-08-04T14:14:19.1551960Z 
+2026-08-04T14:14:19.1552240Z Path: /Users/runner/work/BudsControl/BudsControl/BudsControl.xcodeproj
+2026-08-04T14:14:19.1552660Z 
+2026-08-04T14:14:19.1552720Z 
+2026-08-04T14:14:19.1669110Z + echo '=== Build completed ==='
+2026-08-04T14:14:19.1669890Z === Build completed ===
+2026-08-04T14:14:19.1672970Z + echo 'Contents of build directory:'
+2026-08-04T14:14:19.1674790Z Contents of build directory:
+2026-08-04T14:14:19.1676550Z + ls -la build/
+2026-08-04T14:14:19.1967790Z ls: build/: No such file or directory
+2026-08-04T14:14:19.1982680Z + echo 'build/ not found'
+2026-08-04T14:14:19.1983630Z + echo '=== Searching for .app ==='
+2026-08-04T14:14:19.1984520Z + find build -name '*.app' -type d
+2026-08-04T14:14:19.1985080Z build/ not found
+2026-08-04T14:14:19.1985550Z === Searching for .app ===
+2026-08-04T14:14:19.2340930Z + echo 'No .app in build/'
+2026-08-04T14:14:19.2341250Z No .app in build/
+2026-08-04T14:14:19.2341590Z + echo '=== Searching entire workspace ==='
+2026-08-04T14:14:19.2342000Z === Searching entire workspace ===
+2026-08-04T14:14:19.2343540Z + find . -path '*/Build/Products/*' -name '*.app' -type d
+2026-08-04T14:14:19.2423900Z + find . -name '*.app' -type d
+2026-08-04T14:14:19.2474470Z + head -10
+2026-08-04T14:14:24.2997420Z ##[group]Run set -x
+2026-08-04T14:14:24.2997750Z [36;1mset -x[0m
+2026-08-04T14:14:24.2998010Z [36;1mecho "Searching for BudsControl.app..."[0m
+2026-08-04T14:14:24.2998350Z [36;1mAPP_PATH=""[0m
+2026-08-04T14:14:24.2998570Z [36;1m[0m
+2026-08-04T14:14:24.2998800Z [36;1m# Try multiple search strategies[0m
+2026-08-04T14:14:24.2999250Z [36;1mfor path in $(find build -name "BudsControl.app" -type d 2>/dev/null); do[0m
+2026-08-04T14:14:24.2999690Z [36;1m  APP_PATH="$path"[0m
+2026-08-04T14:14:24.2999960Z [36;1m  break[0m
+2026-08-04T14:14:24.3000140Z [36;1mdone[0m
+2026-08-04T14:14:24.3000320Z [36;1m[0m
+2026-08-04T14:14:24.3000490Z [36;1mif [ -z "$APP_PATH" ]; then[0m
+2026-08-04T14:14:24.3000910Z [36;1m  for path in $(find . -path "*/Build/Products/*" -name "BudsControl.app" -type d 2>/dev/null); do[0m
+2026-08-04T14:14:24.3001340Z [36;1m    APP_PATH="$path"[0m
+2026-08-04T14:14:24.3001560Z [36;1m    break[0m
+2026-08-04T14:14:24.3001740Z [36;1m  done[0m
+2026-08-04T14:14:24.3001980Z [36;1mfi[0m
+2026-08-04T14:14:24.3002140Z [36;1m[0m
+2026-08-04T14:14:24.3002310Z [36;1mif [ -z "$APP_PATH" ]; then[0m
+2026-08-04T14:14:24.3002630Z [36;1m  for path in $(find . -name "BudsControl.app" -type d 2>/dev/null); do[0m
+2026-08-04T14:14:24.3003000Z [36;1m    APP_PATH="$path"[0m
+2026-08-04T14:14:24.3003230Z [36;1m    break[0m
+2026-08-04T14:14:24.3003460Z [36;1m  done[0m
+2026-08-04T14:14:24.3003650Z [36;1mfi[0m
+2026-08-04T14:14:24.3003790Z [36;1m[0m
+2026-08-04T14:14:24.3003980Z [36;1mif [ -z "$APP_PATH" ]; then[0m
+2026-08-04T14:14:24.3004250Z [36;1m  echo "❌ BudsControl.app not found anywhere"[0m
+2026-08-04T14:14:24.3004540Z [36;1m  echo "Current directory:"[0m
+2026-08-04T14:14:24.3004770Z [36;1m  pwd[0m
+2026-08-04T14:14:24.3005000Z [36;1m  echo "All directories in build:"[0m
+2026-08-04T14:14:24.3005280Z [36;1m  find build -type d 2>/dev/null | head -50[0m
+2026-08-04T14:14:24.3005710Z [36;1m  exit 1[0m
+2026-08-04T14:14:24.3005900Z [36;1mfi[0m
+2026-08-04T14:14:24.3006100Z [36;1m[0m
+2026-08-04T14:14:24.3006640Z [36;1mecho "✅ Found app at: $APP_PATH"[0m
+2026-08-04T14:14:24.3006920Z [36;1mmkdir -p artifacts[0m
+2026-08-04T14:14:24.3007110Z [36;1m[0m
+2026-08-04T14:14:24.3007290Z [36;1m# Create proper IPA structure[0m
+2026-08-04T14:14:24.3007540Z [36;1mmkdir -p Payload[0m
+2026-08-04T14:14:24.3007770Z [36;1mcp -R "$APP_PATH" Payload/[0m
+2026-08-04T14:14:24.3008050Z [36;1mcd Payload[0m
+2026-08-04T14:14:24.3008260Z [36;1mls -la[0m
+2026-08-04T14:14:24.3008430Z [36;1mcd ..[0m
+2026-08-04T14:14:24.3008640Z [36;1m[0m
+2026-08-04T14:14:24.3008850Z [36;1mzip -r artifacts/BudsControl-unsigned.ipa Payload[0m
+2026-08-04T14:14:24.3009130Z [36;1mrm -rf Payload[0m
+2026-08-04T14:14:24.3009330Z [36;1m[0m
+2026-08-04T14:14:24.3009600Z [36;1mecho "✅ IPA created successfully!"[0m
+2026-08-04T14:14:24.3009840Z [36;1mls -lh artifacts/[0m
+2026-08-04T14:14:24.3098370Z shell: /bin/bash -e {0}
+2026-08-04T14:14:24.3098720Z env:
+2026-08-04T14:14:24.3099020Z   MD_APPLE_SDK_ROOT: /Applications/Xcode_26.6.app
+2026-08-04T14:14:24.3099320Z ##[endgroup]
+2026-08-04T14:14:24.4036270Z + echo 'Searching for BudsControl.app...'
+2026-08-04T14:14:24.4037050Z Searching for BudsControl.app...
+2026-08-04T14:14:24.4123550Z + APP_PATH=
+2026-08-04T14:14:24.4216860Z ++ find build -name BudsControl.app -type d
+2026-08-04T14:14:24.4218510Z + '[' -z '' ']'
+2026-08-04T14:14:24.4220270Z ++ find . -path '*/Build/Products/*' -name BudsControl.app -type d
+2026-08-04T14:14:24.4285140Z + '[' -z '' ']'
+2026-08-04T14:14:24.4297790Z ++ find . -name BudsControl.app -type d
+2026-08-04T14:14:24.4399610Z + '[' -z '' ']'
+2026-08-04T14:14:24.4401030Z ❌ BudsControl.app not found anywhere
+2026-08-04T14:14:24.4401610Z + echo '❌ BudsControl.app not found anywhere'
+2026-08-04T14:14:24.4401890Z Current directory:
+2026-08-04T14:14:24.4403850Z + echo 'Current directory:'
+2026-08-04T14:14:24.4405090Z /Users/runner/work/BudsControl/BudsControl
+2026-08-04T14:14:24.4408640Z + pwd
+2026-08-04T14:14:24.4409660Z All directories in build:
+2026-08-04T14:14:24.4411950Z + echo 'All directories in build:'
+2026-08-04T14:14:24.4425780Z + find build -type d
+2026-08-04T14:14:24.4444160Z + head -50
+2026-08-04T14:14:24.4465650Z + exit 1
+2026-08-04T14:14:24.4494110Z ##[error]Process completed with exit code 1.
+2026-08-04T14:14:24.4621880Z Node 20 is being deprecated. This workflow is running with Node 24 by default. If you need to temporarily use Node 20, you can set the ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true environment variable. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+2026-08-04T14:14:24.4623160Z ##[group]Run actions/upload-artifact@v4
+2026-08-04T14:14:24.4623420Z with:
+2026-08-04T14:14:24.4623570Z   name: build-log
+2026-08-04T14:14:24.4623750Z   path: build.log
+2026-08-04T14:14:24.4623990Z   retention-days: 7
+2026-08-04T14:14:24.4624190Z   if-no-files-found: warn
+2026-08-04T14:14:24.4624380Z   compression-level: 6
+2026-08-04T14:14:24.4624580Z   overwrite: false
+2026-08-04T14:14:24.4624750Z   include-hidden-files: false
+2026-08-04T14:14:24.4624980Z env:
+2026-08-04T14:14:24.4625160Z   MD_APPLE_SDK_ROOT: /Applications/Xcode_26.6.app
+2026-08-04T14:14:24.4625420Z ##[endgroup]
+2026-08-04T14:14:24.8222040Z (node:1477) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-08-04T14:14:24.8317570Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-08-04T14:14:24.8328120Z With the provided path, there will be 1 file uploaded
+2026-08-04T14:14:24.8329400Z Artifact name is valid!
+2026-08-04T14:14:24.8331460Z Root directory input is valid!
+2026-08-04T14:14:25.2520400Z (node:1477) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-08-04T14:14:25.2525970Z Beginning upload of artifact content to blob storage
+2026-08-04T14:14:25.5298720Z Uploaded bytes 410
+2026-08-04T14:14:25.6213730Z Finished uploading artifact content to blob storage!
+2026-08-04T14:14:25.6316760Z SHA256 digest of uploaded artifact zip is 1e8da91687eef56f860248202dcbc2a184c6df163aea81c258897f8394e75a45
+2026-08-04T14:14:25.6419410Z Finalizing artifact upload
+2026-08-04T14:14:25.8674840Z Artifact build-log.zip successfully finalized. Artifact ID 8895807332
+2026-08-04T14:14:25.8675490Z Artifact build-log has been successfully uploaded! Final size is 410 bytes. Artifact ID is 8895807332
+2026-08-04T14:14:25.8730600Z Artifact download URL: https://github.com/shandianks/BudsControl/actions/runs/30917875982/artifacts/8895807332
+2026-08-04T14:14:25.9009730Z Node 20 is being deprecated. This workflow is running with Node 24 by default. If you need to temporarily use Node 20, you can set the ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true environment variable. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+2026-08-04T14:14:25.9010960Z Post job cleanup.
+2026-08-04T14:14:26.0668590Z [command]/opt/homebrew/bin/git version
+2026-08-04T14:14:26.0888950Z git version 2.55.0
+2026-08-04T14:14:26.1088950Z Copying '/Users/runner/.gitconfig' to '/Users/runner/work/_temp/f25a185f-924e-4e6f-a9fe-c71675ebd2b1/.gitconfig'
+2026-08-04T14:14:26.1112250Z Temporarily overriding HOME='/Users/runner/work/_temp/f25a185f-924e-4e6f-a9fe-c71675ebd2b1' before making global git config changes
+2026-08-04T14:14:26.1119560Z Adding repository directory to the temporary git global config as a safe directory
+2026-08-04T14:14:26.1120350Z [command]/opt/homebrew/bin/git config --global --add safe.directory /Users/runner/work/BudsControl/BudsControl
+2026-08-04T14:14:26.1121470Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-08-04T14:14:26.1152530Z [command]/opt/homebrew/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-08-04T14:14:26.3131640Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-08-04T14:14:26.3233750Z http.https://github.com/.extraheader
+2026-08-04T14:14:26.3432740Z [command]/opt/homebrew/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-08-04T14:14:26.3464500Z [command]/opt/homebrew/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-08-04T14:14:26.5923310Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-08-04T14:14:26.6329120Z [command]/opt/homebrew/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-08-04T14:14:27.0522740Z Cleaning up orphan processes
+2026-08-04T14:14:27.8810840Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/upload-artifact@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

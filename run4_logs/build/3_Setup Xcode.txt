@@ -1,0 +1,6 @@
+﻿2026-08-04T14:19:29.0116650Z ##[group]Run maxim-lobanov/setup-xcode@v1
+2026-08-04T14:19:29.0117760Z with:
+2026-08-04T14:19:29.0118440Z   xcode-version: latest-stable
+2026-08-04T14:19:29.0119280Z ##[endgroup]
+2026-08-04T14:19:29.1032650Z Switching Xcode to version 'latest-stable'...
+2026-08-04T14:19:29.2140150Z Xcode is set to 26.6.0 (17F113)
