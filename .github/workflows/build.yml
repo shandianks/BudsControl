@@ -26,23 +26,9 @@ jobs:
           -scheme BudsControl \
           -destination 'platform=iOS Simulator,name=iPhone 17' \
           -configuration Release \
-          build 2>&1 | tee build-output.txt
-        BUILD_EXIT=${PIPESTATUS[0]}
-        echo "Build exit code: $BUILD_EXIT"
-        if [ $BUILD_EXIT -ne 0 ]; then
-          echo "=== BUILD FAILED ==="
-          tail -100 build-output.txt
-          exit $BUILD_EXIT
-        fi
+          build
+        echo "=== Build exit code: $? ==="
         find . -name "*.app" -type d
-    
-    - name: Upload Build Output
-      if: always()
-      uses: actions/upload-artifact@v4
-      with:
-        name: build-output
-        path: build-output.txt
-        retention-days: 1
     
     - name: Package .app
       if: success()
