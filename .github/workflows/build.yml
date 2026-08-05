@@ -31,6 +31,7 @@ jobs:
       
       - name: Build iOS App
         run: |
+          echo "=== Starting build ==="
           xcodebuild -project BudsControl.xcodeproj \
             -scheme BudsControl \
             -sdk iphoneos \
@@ -39,8 +40,15 @@ jobs:
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGN_IDENTITY="" \
-            PROVISIONING_PROFILE_SPECIFIER=""
-          echo "=== Build exit code: $? ==="
+            PROVISIONING_PROFILE_SPECIFIER="" \
+            ONLY_ACTIVE_ARCH=NO \
+            ARCHS="arm64" || {
+              echo ""
+              echo "========================================"
+              echo "BUILD FAILED - Searching for errors..."
+              echo "========================================"
+              exit 1
+            }
           echo "=== Build succeeded ==="
           find build -name "*.app" -type d 2>/dev/null || echo "No .app in build/"
       
@@ -77,11 +85,3 @@ jobs:
           name: BudsControl-unsigned
           path: artifacts/BudsControl-unsigned.ipa
           retention-days: 30
-      
-      - name: Upload build log on failure
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-log
-          path: build.log
-          retention-days: 7

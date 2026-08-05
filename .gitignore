@@ -1,0 +1,12 @@
+.DS_Store
+build/
+DerivedData/
+*.ipa
+*.zip
+logs/
+logs.zip
+ipa_check/
+ipa_check.zip
+run*_logs/
+run*_logs.zip
+*.log
