@@ -32,6 +32,7 @@ jobs:
       - name: Build iOS App
         run: |
           set -x
+          # First try building without piping to tee so exit code is preserved
           xcodebuild -project BudsControl.xcodeproj \
             -scheme BudsControl \
             -sdk iphoneos \
@@ -41,16 +42,19 @@ jobs:
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGN_IDENTITY="" \
             PROVISIONING_PROFILE_SPECIFIER="" \
-            | tee build.log
+            2>&1 | tee build.log
           BUILD_EXIT=${PIPESTATUS[0]}
           echo "=== Build exit code: $BUILD_EXIT ==="
+          if [ $BUILD_EXIT -ne 0 ]; then
+            echo "=== BUILD FAILED ==="
+            echo "Last 100 lines of build log:"
+            tail -n 100 build.log
+            exit $BUILD_EXIT
+          fi
+          echo "=== Build succeeded ==="
           echo "Searching for .app..."
           find build -name "*.app" -type d 2>/dev/null || echo "No .app in build/"
           find . -name "*.app" -type d 2>/dev/null | head -10 || echo "No .app anywhere"
-          if [ $BUILD_EXIT -ne 0 ]; then
-            echo "Build failed with exit code $BUILD_EXIT"
-            exit $BUILD_EXIT
-          fi
       
       - name: Package .app
         if: success()
@@ -88,7 +92,7 @@ jobs:
           path: artifacts/BudsControl-unsigned.ipa
           retention-days: 30
       
-      - name: Upload build log
+      - name: Upload build log on failure
         if: failure()
         uses: actions/upload-artifact@v4
         with:
