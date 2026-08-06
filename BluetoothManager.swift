@@ -237,6 +237,7 @@ class BluetoothManager: NSObject, ObservableObject {
     @Published var isConnected = false
     @Published var discoveredDevices: [BudsDevice] = []
     @Published var errorMessage: String?
+    @Published var bluetoothDiagnostics: [String] = []
     
     // Battery
     @Published var batteryLeft: Int = 0
@@ -288,6 +289,7 @@ class BluetoothManager: NSObject, ObservableObject {
         
         isScanning = true
         errorMessage = nil
+        bluetoothDiagnostics.removeAll()
         discoveredDevices.removeAll()
         
         centralManager.scanForPeripherals(
@@ -307,7 +309,7 @@ class BluetoothManager: NSObject, ObservableObject {
     
     func connect(to device: BudsDevice) {
         stopScanning()
-        
+
         guard let peripheral = device.peripheral else {
             errorMessage = "Invalid peripheral"
             return
@@ -580,8 +582,10 @@ extension BluetoothManager: CBPeripheralDelegate {
             return
         }
 
-        // Discover every characteristic, then select the control channel by
-        // UUID/properties. This supports firmware revisions with UUID aliases.
+        bluetoothDiagnostics = services.map { "Service: \($0.uuid.uuidString)" }
+
+        // Discover every characteristic. Do not assume that a classic SPP UUID
+        // is also exposed as a BLE GATT characteristic.
         for service in services {
             peripheral.discoverCharacteristics(nil, for: service)
         }
@@ -597,6 +601,8 @@ extension BluetoothManager: CBPeripheralDelegate {
             let isKnownSPP = characteristic.uuid == sppCharacteristicUUID
             let canWrite = characteristic.properties.contains(.write) || characteristic.properties.contains(.writeWithoutResponse)
             let canNotify = characteristic.properties.contains(.notify) || characteristic.properties.contains(.indicate)
+            let properties = characteristic.properties.map { String(describing: $0) }.joined(separator: ",")
+            bluetoothDiagnostics.append("Characteristic: \(service.uuid.uuidString) / \(characteristic.uuid.uuidString) [\(properties)]")
 
             if isKnownSPP || (canWrite && canNotify) {
                 sppCharacteristic = characteristic
@@ -617,6 +623,13 @@ extension BluetoothManager: CBPeripheralDelegate {
         if sppCharacteristic == nil {
             errorMessage = "Connected, but no writable Buds control characteristic was found"
         }
+    }
+
+    func diagnosticsText() -> String {
+        if bluetoothDiagnostics.isEmpty {
+            return "No BLE GATT services have been reported yet."
+        }
+        return bluetoothDiagnostics.joined(separator: "\n")
     }
     
     func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {

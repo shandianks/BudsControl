@@ -69,6 +69,24 @@ struct ConnectionView: View {
             .disabled(bluetoothManager.isScanning)
             .padding(.horizontal, 40)
             
+            if !bluetoothManager.bluetoothDiagnostics.isEmpty {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("BLE 诊断信息")
+                        .font(.headline)
+                    ScrollView {
+                        Text(bluetoothManager.diagnosticsText())
+                            .font(.system(.caption, design: .monospaced))
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .textSelection(.enabled)
+                    }
+                    .frame(maxHeight: 180)
+                    .padding(8)
+                    .background(Color.gray.opacity(0.1))
+                    .cornerRadius(8)
+                }
+                .padding(.horizontal)
+            }
+
             if !bluetoothManager.discoveredDevices.isEmpty {
                 List(bluetoothManager.discoveredDevices) { device in
                     Button(action: {
